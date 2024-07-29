@@ -13,6 +13,7 @@ read_val()
     grep "${varName}" ./environment.env | cut -d "=" -f 2- | xargs
 }
 
+
 ROOTUSERDB=$(read_val ROOTUSERDB)
 ROOTPASSDB=$(read_val ROOTPASSDB)
 YOURMONGODB=$(read_val YOURMONGODB)
@@ -21,6 +22,15 @@ YOURTOKENID=$(read_val YOURTOKENID)
 YOURSECRET=$(read_val YOURSECRET)
 JWTSECRETKEY=$(read_val JWTSECRETKEY)
 
+# Check if one of the .env files is empty
+arr=("$ROOTUSERDB" "$ROOTPASSDB" "$YOURMONGODB" "$YOURMONGODB" "$YOURPROXMOXURL" "$YOURTOKENID" "$YOURSECRET" "$JWTSECRETKEY")
+for val in "${arr[@]}"; do
+    if [ -z "$val" ]; then
+        echo "Error: Problem in .env file"
+        exit 1
+    fi
+done
+arr=("")
 # Installing dependencies
 if ! dnf install -y nodejs docker; then 
   echo "Error installing dependencies" >&2
@@ -33,7 +43,7 @@ fi
 systemctl start docker
 systemctl enable docker
 
-# Making and running a mongodb on docker
+# Building and running a mongodb on docker
 mkdir -p ~/mongoDB
 cd ~/mongoDB
 if ! docker pull mongo:4.4.6; then
